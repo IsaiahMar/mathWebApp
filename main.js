@@ -7,12 +7,49 @@ var points = 0;
 var answer;
 var qMode = "";
 
-/* iframe.src = "https://baldis-basics-in-education-and-learning.fandom.com/wiki/File:BAL_Praise5.ogg?embedplayer=yes";
-        document.body.appendChild(iframe)
-            // width = "180"
-            // height = "20"
-            // frameborder = "0"
-            // webkitAllowFullScreen mozallowfullscreen allowFullScreen > < /iframe>*/
+//this function is so it's easier to convert to react later on
+const displayInfo = (name, hasLinkedIn, hasGithub, linkedInLink, githubLink) => {
+    let div = document.createElement("div");
+    let nameH3 = document.createElement("h3");
+    nameH3.innerText = name;
+    if (hasGithub) {
+        let miniDiv = document.createElement('div');
+        let a = document.createElement("a");
+        let img = document.createElement("img");
+        img.src = "media/github logo.png"
+        img.addEventListener("mouseover", (e) => {
+            e.preventDefault();
+            img.src = "media/github logo hover.png";
+            setTimeout(() => {
+                img.src = "media/github logo.png";
+            }, 500);
+        })
+        a.href = githubLink;
+        a.append(img);
+        miniDiv.append(a);
+        div.append(miniDiv)
+    }
+    if (hasLinkedIn) {
+        let miniDiv = document.createElement('div');
+        let a = document.createElement("a");
+        let img = document.createElement("img");
+        img.src = "media/linkedIn logo.png";
+        img.style.width="70px";
+        a.href = linkedInLink;
+        a.append(img);
+        miniDiv.append(a);
+        div.append(miniDiv)
+    }
+    div.prepend(nameH3);
+    document.getElementById("about").appendChild(div);
+}
+
+displayInfo("Bryan", true, true, "https://linkedin.com/in/bryang229", "https://github.com/bryang229");
+displayInfo("Isaiah", false, true, "", "https://github.com/IsaiahMar");
+displayInfo("David ", false, true, "", "https://github.com/David800888");
+displayInfo("Josiah", false, false, "", "");
+
+
 
 
 const hideNavBtns = (id) => {
@@ -50,6 +87,7 @@ const transitionPage = (mode) => {
         let diffText = document.getElementById("diffText")
         let qElement = document.getElementById("question");
         qElement.remove()
+        document.getElementById("response").remove();
         document.getElementById("qForm").remove()
         for (let i = 0; i < lazyArr.length; i++) {
             lazyArr[i].style.display = "";
@@ -129,6 +167,39 @@ function decodeOperand(operand) {
 }
 
 const mediumMode = () => {
+
+    console.log("Hey")
+    let qElement = document.getElementById("question");
+    let a = Math.floor(Math.random() * 50) - 24;
+    let b = Math.floor(Math.random() * 50) - 24;
+    let c = Math.floor(Math.random() * 50) - 24;
+    let sumA = 0;
+    let sumB = 0;
+    //KEY: 1:+ 2:- 3:*
+    let operand = Math.floor(Math.random() * 3) + 1;
+    let operand2 = Math.floor(Math.random() * 3) + 1;
+    console.log(a, b, c, operand, operand2)
+    if (operand == 3 && operand2 == 3) {
+        sumA = getSimpleAnswer(a, b, 3);
+        sumB = getSimpleAnswer(sumA, c, 3);
+    } else if (operand != 3 && operand2 == 3) {
+        sumA = getSimpleAnswer(b, c, 3);
+        sumB = getSimpleAnswer(a, sumB, operand);
+    } else if (operand == 3 && operand2 != 3) {
+        sumA = getSimpleAnswer(a, b, 3);
+        sumB = getSimpleAnswer(sumA, c, operand2);
+    } else {
+        sumA = getSimpleAnswer(a, b, operand);
+        sumB = getSimpleAnswer(sumA, c, operand2);
+    }
+    answer = sumB;
+
+    qElement.innerText = `${a} ${decodeOperand(operand)} ${b} ${decodeOperand(operand2)} ${c}`;
+
+
+}
+
+const hardMode = () => {
     let qElement = document.getElementById("question");
     let a = Math.floor(Math.random() * 50) - 24;
     let b = Math.floor(Math.random() * 50) - 24;
@@ -170,8 +241,8 @@ const mediumMode = () => {
         sumC = getSimpleAnswer(sumB, d, operand3);
         console.log(3, 0, 0);
     } else if (operand != 3 && operand2 == 3 && operand3 != 3) {
-        sumA = getSimpleAnswer(a, b, 3);
-        sumB = getSimpleAnswer(sumA, c, operand);
+        sumA = getSimpleAnswer(b, c, 3);
+        sumB = getSimpleAnswer(a,sumA , operand);
         sumC = getSimpleAnswer(sumB, d, operand3);
         console.log(0, 3, 0)
     } else if (operand != 3 && operand2 != 3 && operand3 == 3) {
@@ -190,35 +261,6 @@ const mediumMode = () => {
 
     qElement.innerText = `${a} ${decodeOperand(operand)} ${b} ${decodeOperand(operand2)} ${c} ${decodeOperand(operand3)} ${d} = ?`;
 
-}
-
-const hardMode = () => {
-    console.log("Hey")
-    let qElement = document.getElementById("question");
-    let a = Math.floor(Math.random() * 50) - 24;
-    let b = Math.floor(Math.random() * 50) - 24;
-    let c = Math.floor(Math.random() * 50) - 24;
-    let sumA = 0;
-    let sumB = 0;
-    //KEY: 1:+ 2:- 3:*
-    let operand = Math.floor(Math.random() * 3) + 1;
-    let operand2 = Math.floor(Math.random() * 3) + 1;
-    if (operand == 3 && operand2 == 3) {
-        sumA = getSimpleAnswer(a, b, 3);
-        sumB = getSimpleAnswer(sumA, c, 3);
-    } else if (operand != 3 && operand2 == 3) {
-        sumA = getSimpleAnswer(b, c, 3);
-        sumB = getSimpleAnswer(a, sumB, operand);
-    } else if (operand == 3 && operand2 != 3) {
-        sumA = getSimpleAnswer(a, b, 3);
-        sumB = getSimpleAnswer(sumA, c, operand2);
-    } else {
-        sumA = getSimpleAnswer(a, b, operand);
-        sumB = getSimpleAnswer(sumA, c, operand2);
-    }
-    answer = sumB;
-
-    qElement = `${a} ${decodeOperand(operand)} ${b} ${decodeOperand(operand2)} ${c}`;
 }
 
 
@@ -255,9 +297,11 @@ const checkAnswer = (e) => {
         points++;
         response.innerText = "GOOD JOB";
         displayNextBtn()
+        points++;
 
     } else {
         response.innerText = 'TRY AGAIN... YOU GOT THIS!';
+        points--;
     }
 }
 

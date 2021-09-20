@@ -27,6 +27,11 @@ nav .navBtn:hover {
     background-repeat: round;
 }
 
+footer div {
+    display:inline;
+    margin: 10px;
+}
+
 body {
     background-color: #49B3FF;
 }
@@ -52,4 +57,9 @@ footer {
     display: flex;
     justify-content: center;
     left: 15px;
+}
+
+#about{
+    display: flex;
+    justify-content: space-around;
 }

@@ -6,8 +6,89 @@ let modeSelected = false;
 var points = 0;
 var answer;
 var qMode = "";
+let timerDisplay = document.getElementById("timerDisplay");
+let countdown; // This will hold our interval
+let timeLeft = 30;
+// Creates the points display on the screen
+let pointsDisplay = document.createElement("h2");
+pointsDisplay.id = "pointsDisplay";
+pointsDisplay.innerText = `Score: ${points}`;
+// Appends it to the top of the body (you can change this to a specific div if you prefer)
+document.body.prepend(pointsDisplay); 
 
-//this function is so it's easier to convert to react later on
+// Helper function to update the text whenever points change
+const updateScoreboard = () => {
+    pointsDisplay.innerText = `Score: ${points}`;
+}
+//this function is so it's easier to convert to react later 
+const startTimer = () => {
+    clearInterval(countdown); // Clear any old timers just in case
+    timeLeft = 30; // Reset to 30 seconds
+    timerDisplay.innerText = `Time: ${timeLeft}`;
+    
+    countdown = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = `Time: ${timeLeft}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown); // Stop the clock at 0
+            handleTimeOut();
+        }
+    }, 1000); // 1000 milliseconds = 1 second
+}
+
+const handleTimeOut = () => {
+    let response = document.getElementById("response");
+    let submitBtn = document.getElementById("submit");
+    
+    response.innerText = "TIME'S UP! GAME OVER!";
+    submitBtn.disabled = true; // Lock the answer input
+    
+    // Wait 2 seconds (2000 milliseconds) so the user can read the message, then go home
+    setTimeout(() => {
+        returnToHome();
+    }, 2000); 
+}
+const returnToHome = () => {
+    // 1. Tell the app we are no longer in a quiz mode
+    modeSelected = false;
+
+    // 2. Safely remove quiz elements if they exist on the screen
+    let qElement = document.getElementById("question");
+    let response = document.getElementById("response");
+    let qForm = document.getElementById("qForm");
+    let newBtn = document.getElementById("newBtn");
+
+    if (qElement) qElement.remove();
+    if (response) response.remove();
+    if (qForm) qForm.remove();
+    if (newBtn) newBtn.remove();
+
+    // 3. Un-hide all the home page headers
+    let lazyArr = document.querySelectorAll(".homePage");
+    for (let i = 0; i < lazyArr.length; i++) {
+        lazyArr[i].style.display = "";
+    }
+    
+    // Clear the "Difficulty chosen:" text
+    document.getElementById("diffText").innerText = "";
+
+    // 4. Reset the navigation buttons to show all of them and reset their text
+    let navBtns = ["easy", "medium", "hard"];
+    for (let i = 0; i < navBtns.length; i++) {
+        let btn = document.getElementById(navBtns[i]);
+        btn.style.display = ""; // Un-hide the button
+        
+        // Capitalize the first letter to reset the text (e.g., "easy" becomes "Easy")
+        btn.innerText = navBtns[i].charAt(0).toUpperCase() + navBtns[i].slice(1);
+    }
+
+    // 5. Reset the points and timer for the next game!
+    points = 0;
+    timeLeft = 30;
+    updateScoreboard();
+    timerDisplay.innerText = `Time: ${timeLeft}`;
+}
 const displayInfo = (name, hasLinkedIn, hasGithub, linkedInLink, githubLink) => {
     let div = document.createElement("div");
     let nameH3 = document.createElement("h3");
@@ -135,6 +216,7 @@ const makeQLayout = (mode) => {
     } else if (mode == "hard") {
         hardMode();
     }
+    startTimer()
 }
 
 const getSimpleAnswer = (a, b, operand) => {
@@ -293,15 +375,29 @@ const checkAnswer = (e) => {
     e.preventDefault();
     let userAnswer = parseInt(document.getElementById("answer").value);
     let response = document.getElementById("response");
-    if (userAnswer == answer) {
-        points++;
-        response.innerText = "GOOD JOB";
-        displayNextBtn()
-        points++;
+    let submitBtn = document.getElementById("submit");
+
+    if (userAnswer === answer) {
+        // Award different points based on difficulty
+        clearInterval(countdown)
+        if (qMode === "easy") {
+            points += 10;
+        } else if (qMode === "medium") {
+            points += 20;
+        } else if (qMode === "hard") {
+            points += 30;
+        }
+
+        response.innerText = "GOOD JOB!";
+        updateScoreboard(); // Update the UI
+        
+        submitBtn.disabled = true; // Prevent spam-clicking for infinite points
+        displayNextBtn(qMode);
 
     } else {
         response.innerText = 'TRY AGAIN... YOU GOT THIS!';
-        points--;
+        points -= 5; // Penalty for getting it wrong
+        updateScoreboard(); // Update the UI
     }
 }
 
